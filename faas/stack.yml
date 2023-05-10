@@ -1,0 +1,46 @@
+version: 1.0
+provider:
+  name: openfaas
+  gateway: http://127.0.0.1:8080
+functions:
+  addtodo:
+    lang: python3-http
+    handler: ./addtodo
+    image: panhan28/serverlesstodolist_addtodo:latest
+    common_files: true
+    build_args:
+        TEST_ENABLED: false
+    environment:
+        MONGODB_SERVICE_URL: 54.86.120.210
+
+  completetodo:
+    lang: python3-http
+    handler: ./completetodo
+    image: panhan28/serverlesstodolist_completetodo:latest
+    common_files: true
+    build_args:
+        TEST_ENABLED: false
+    environment:
+        MONGODB_SERVICE_URL: 54.86.120.210
+
+  deletetodo:
+    lang: python3-http
+    handler: ./deletetodo
+    image: panhan28/serverlesstodolist_deletetodo:latest
+    common_files: true
+    build_args:
+        TEST_ENABLED: false
+    environment:
+        MONGODB_SERVICE_URL: 54.86.120.210
+
+  getalllist:
+    lang: python3-http
+    handler: ./getalllist
+    image: panhan28/serverlesstodolist_getalllist:latest
+    common_files: true
+    build_args:
+        TEST_ENABLED: false
+    environment:
+        MONGODB_SERVICE_URL: 54.86.120.210
+
+
