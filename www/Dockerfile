@@ -11,5 +11,5 @@ FROM node:14
 WORKDIR /app
 COPY --from=build /app/build ./build
 RUN npm install -g http-server
-EXPOSE 8080
-CMD ["http-server", "build", "-p", "8080"]
+EXPOSE 8888
+CMD ["http-server", "build", "-p", "8888"]
