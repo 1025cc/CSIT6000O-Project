@@ -15,6 +15,8 @@ function App() {
   const [alertDismissable, setAlertDismissable] = useState(false);
   const [idToken, setIdToken] = useState('unchange');
   const [toDos, setToDos] = useState([]);
+  const location = window.location.href;
+  const api = location.substr(0,location.length-1) + ':31112';
 
   useEffect(() => {
     getIdToken();
@@ -58,7 +60,7 @@ function App() {
 
   const getAllTodos = async () => {
     const result = await axios({
-      url: `${config.api_base_url}/getalllist/`,
+      url: `${api}/getalllist/`,
     })
     .then(response => {
       console.log('Response:', response);
@@ -96,7 +98,7 @@ function App() {
 
     const result = await axios({
       method: 'POST',
-      url: `${config.api_base_url}/addtodo/`,
+      url: `${api}/addtodo/`,
       data: newToDo
     }).catch(error => {
       console.log(error.response);
@@ -116,7 +118,7 @@ function App() {
 
     const result = await axios({
       method: 'DELETE',
-      url: `${config.api_base_url}/item/${itemId}`
+      url: `${api}/item/${itemId}`
     });
 
     if (result && result.status === 401) {
@@ -132,7 +134,7 @@ function App() {
 
     const result = await axios({
       method: 'POST',
-      url: `${config.api_base_url}/item/${itemId}/done`
+      url: `${api}/item/${itemId}/done`
     });
 
     if (result && result.status === 200) {
