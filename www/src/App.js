@@ -16,7 +16,7 @@ function App() {
   const [idToken, setIdToken] = useState('unchange');
   const [toDos, setToDos] = useState([]);
   const location = window.location.href;
-  const api = location.substr(0,location.length-1) + ':31112';
+  const api = location.substr(0,location.length-1) + ':31112/function';
 
   useEffect(() => {
     getIdToken();
