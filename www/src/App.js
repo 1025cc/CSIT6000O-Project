@@ -58,7 +58,7 @@ function App() {
 
   const getAllTodos = async () => {
     const result = await axios({
-      url: `/api/getalllist/`,
+      url: `${config.api_base_url}/getalllist/`,
     })
     .then(response => {
       console.log('Response:', response);
@@ -96,7 +96,7 @@ function App() {
 
     const result = await axios({
       method: 'POST',
-      url: `/api/addtodo/`,
+      url: `${config.api_base_url}/addtodo/`,
       data: newToDo
     }).catch(error => {
       console.log(error.response);
@@ -116,7 +116,7 @@ function App() {
 
     const result = await axios({
       method: 'DELETE',
-      url: `/api/item/${itemId}`
+      url: `${config.api_base_url}/item/${itemId}`
     });
 
     if (result && result.status === 401) {
@@ -132,7 +132,7 @@ function App() {
 
     const result = await axios({
       method: 'POST',
-      url: `/api/item/${itemId}/done`
+      url: `${config.api_base_url}/item/${itemId}/done`
     });
 
     if (result && result.status === 200) {

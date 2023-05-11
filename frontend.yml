@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: frontend-deployment
-  namespace: openfaas-fn
+  namespace: openfaas
   labels:
     app: frontend-app
 spec:
@@ -25,7 +25,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: frontend-service
-  namespace: openfaas-fn
+  namespace: openfaas
 spec:
   internalTrafficPolicy: Cluster
   type: ClusterIP
@@ -34,4 +34,5 @@ spec:
   ports:
   - protocol: TCP
     port: 80
+    targetPort: 8080
 
