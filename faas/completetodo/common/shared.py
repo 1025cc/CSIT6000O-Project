@@ -15,6 +15,7 @@ HEADERS = {
 class NotFoundException(Exception):
     pass
 
+
 def get_user_id(event_headers):
     """
     Retrieve user_id from cookies if it exists, otherwise set and return it

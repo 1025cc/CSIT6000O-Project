@@ -23,31 +23,42 @@ The project is ready for deployment to a kubernetes cluster. To make the deploym
 
 For the test machine, we choose the following config:
 
-这个是openfaas的
-
 |               |                                        |
 | ------------- | -------------------------------------- |
-| OS            | Ubuntu Server 20.04 TLS                |
+| OS            | Ubuntu Server 22.04 TLS                |
 | Architecture  | 64-bit(x86)                            |
 | Instance Type | M5.large                               |
 | Network       | Public Subnet with public IP           |
 | SG            | TCP Ports: 22, 80, 8080 From: Anywhere |
-| Storage       | 8GiB gp3 on Root volume                |
+| Storage       | 30GiB gp3 on Root volume               |
 
-这个是MongoDB的
 
-|               |                                        |
-| ------------- | -------------------------------------- |
-| OS            | Ubuntu Server 20.04 TLS                |
-| Architecture  | 64-bit(x86)                            |
-| Instance Type | M5.large                               |
-| Network       | Public Subnet with public IP           |
-| SG            | TCP Ports: 22, 80, 8080 From: Anywhere |
-| Storage       | 16GiB gp3 on Root volume               |
 
-> **After the deployment, all the Openfaas functions can be accessed through {server_ip}:31112/ui/. And the Frontend Web App can be accessed through http://{server_ip}**
+> **After the deployment, all the Openfaas functions can be accessed through {server_ip}:31112/ui/. The mongodb database can be accessed through {server_ip}:27017 with compass.And the Frontend Web App can be accessed through http://{server_ip}**
 
 ![](https://i.ibb.co/w4Dc9MH/deploy.png)
+
+## Automatic Deployment
+
+### Setup
+
+To setup the environment, you can use an automatic script on EC2 launch.
+
+```bash
+#!/bin/bash
+git clone https://github.com/yutong-niu/csit6000o-proj.git
+
+cd todolist
+sh setup.sh 2>&1 > /tmp/setup.log
+sudo /var/proj/deploy.sh 2>&1 > /tmp/deploy.log
+```
+
+The user data runs two scripts:
+
+- setup.sh: install minikube, kubectl, docker, socat, conntrack, arkade, faas-cli
+- deploy.sh: deploy openfass, custom openfaas functions, mongodb, frontend application
+
+The deploy script also exposes frontend application, mongodb database and openfaas gateway through ```kubectl port-forward```.
 
 ## Manual Deployment
 
@@ -128,25 +139,9 @@ Since we deploy the project to EC2 instance, here we choose not to use a driver 
 
 #### Step 2: Deploy Openfaas
 
-这个命令我没跑通
-
 ```bash
-arkade install openfaas --basic-auth-password admin --set=faasIdler.dryRun=false
+arkade install openfaas --basic-auth-password password123 --set=faasIdler.dryRun=false
 ```
-
-#### 下面这个我可以跑通
-
-```bash
-git clone https://github.com/openfaas/faas-netes
-cd faas-netes
-kubectl apply -f namespaces.yml
-kubectl -n openfaas create secret generic basic-auth \
-    --from-literal=basic-auth-user=admin \
-    --from-literal=basic-auth-password=admin
-kubectl apply -f ./yaml/
-```
-
-
 
 Here we use a command line option `basic-auth-password` for simplicity, but this is a deprecated method. The password is used for `faas-cli` to login later. You can always use `kubectl -n openfaas get secret basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode` to get the admin password for openfaas.
 
@@ -154,91 +149,19 @@ Here we use a command line option `basic-auth-password` for simplicity, but this
 
 #### Step 4: Deploy Mongodb
 
-
-Mongodb包在默认的Ubuntu存储库中是不可使用的。首先需要导入包管理系统使用的公钥。
-
 ```bash
-wget -qO - https://www.mongodb.org/static/pgp/server-6.0.asc | sudo apt-key add -
+kubectl apply -f ${REPO_HOME}/mongodb.yml
 ```
-
-更新apt资源库
-
-```bash
-sudo apt update
-sudo apt upgrade -y
-```
-
-
-创建列表文件
-
-```bash
-echo "deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-
-sudo apt update
-```
-
-
-
-#### 安装libssl
-
-```bash
-curl -LO http://archive.ubuntu.com/ubuntu/pool/main/o/openssl/libssl1.1_1.1.1-1ubuntu2.1~18.04.22_amd64.deb
-sudo dpkg -i ./libssl1.1_1.1.1-1ubuntu2.1~18.04.22_amd64.deb
-```
-
-安装mongodb
-
-```bash
-sudo apt install -y mongodb-org
-```
-
-
-安装完成后可以启动mongodb了
-
-```bash
-sudo systemctl start mongod  # start mongodb
-
-sudo systemctl status mongod  # check status of mongodb
-```
-
-
 
 可以下载compass 查看数据库
 
-需要新建账户
+转发到27017
 
-```bash
-use admin
-db.update("admin", {pwd: 'admin', roles:["dbAdminAnyDatabase", "readWriteAnyDatabase"]}
+```
+kubectl port-forward -n openfaas-fn svc/mongodb-service 27017:27017 --address=0.0.0.0 &
 ```
 
-修改配置：
-
-```bash
-sudo vim /etc/mongod.conf
-```
-
-
-
-```bash
-net:
-  port: 27017
-  bindIp: 0.0.0.0
-```
-
-
-
-其中：
-
-- bindIp改为`0.0.0.0`，表示不限制ip访问，可远程通过软件访问，默认的配置值是`127.0.0.1`，即只能本机访问；
-
-
-
-
-
-
-
-链接的string
+链接数据库的string
 
 ```bash
 mongodb://admin:admin@54.86.120.210:27017/?authMechanism=DEFAULT
@@ -246,37 +169,7 @@ mongodb://admin:admin@54.86.120.210:27017/?authMechanism=DEFAULT
 mongodb://admin:admin@{server_ip}:27017/?authMechanism=DEFAULT
 ```
 
-#### Step 7: docker部署
-
-https://hub.docker.com/
-
-要用的模块新建好，得到链接后，在stack.yml里面更新image对应的位置。
-
-```bash
-version: 1.0
-
-provider:
-
- name: openfaas
-
- gateway: http://127.0.0.1:8080
-
-functions:
-
- addtodo:
-
-  lang: python3-http
-
-  handler: ./addtodo
-
-  image: panhan28/serverlesstodolist_addtodo:latest
-```
-
 #### 
-
-
-
-
 
 #### Step 7: Deploy Openfaas Functions
 
@@ -284,10 +177,10 @@ functions:
 
 ```bash
 export OPENFAAS_URL={server_ip}
-faas-cli login -u admin -p admin --gateway http://{server_ip}:31112
+faas-cli login -u admin -p password123 --gateway http://{server_ip}:31112
 
 export OPENFAAS_URL=54.221.132.100 
-faas-cli login -u admin -p admin --gateway http://54.221.132.100:31112
+faas-cli login -u admin -p password123 --gateway http://54.221.132.100:31112
 ```
 
 进入stack.yml的文件夹
@@ -312,11 +205,18 @@ faas-cli deploy -f stack.yml --gateway http://{server_ip}:31112
 报错的话可以用这个命令
 
 ```bash
- faas-cli logs {function_name} --gateway http://{server_ip}:31112
+faas-cli logs {function_name} --gateway http://{server_ip}:31112
 ```
 
+Step 3: Port-forward for Openfaas Gateway
 
+转发功能到8080
 
+```
+kubectl port-forward -n openfaas svc/gateway 8080:8080 --address=0.0.0.0 &
+```
+
+An Openfaas gateway service(svc/gateway) is created on openfaas deployment in openfaas namespace, a port forwarding is necessary so that the openfaas functions can be accessed through {server_ip}:8080/function/{function_name}. Ensure the gateway service is ready before running this command. And always run this command in the background to keep it from occupying the terminal.
 
 
 > **After the deployment, all the Openfaas functions can be accessed through {server_ip}:31112/ui/. And the Frontend Web App can be accessed through http://{server_ip}**
@@ -358,13 +258,6 @@ https://segmentfault.com/a/1190000023702396
 
 
 
-Step 3: Port-forward for Openfaas Gateway
-
-kubectl port-forward -n openfaas svc/gateway 8080:8080 --address=0.0.0.0 &
-
-An Openfaas gateway service(svc/gateway) is created on openfaas deployment in openfaas namespace, a port forwarding is necessary so that the openfaas functions can be accessed through {server_ip}:8080/function/{function_name}. Ensure the gateway service is ready before running this command. And always run this command in the background to keep it from occupying the terminal.
-
-
 #### Step 5: Deploy Frontend
 
 ```bash
@@ -380,4 +273,3 @@ kubectl port-forward -n openfaas-fn svc/frontend-service 80:8080 --address=0.0.0
 ```
 
 An frontend service(`svc/frontend-service`) is created on frontend deployment in `openfaas-fn` namespace, a port forwarding is necessary so that the web application can be accessed through `http://{server_ip}`. Ensure the frontend service is ready before running this command. And always run this command in the background to keep it from occupying the terminal.
-
