@@ -15,17 +15,6 @@ HEADERS = {
 class NotFoundException(Exception):
     pass
 
-def handle_decimal_type(obj):
-    """
-    json serializer which works with Decimal types returned from DynamoDB.
-    """
-    if isinstance(obj, Decimal):
-        if float(obj).is_integer():
-            return int(obj)
-        else:
-            return float(obj)
-    raise TypeError
-
 def get_user_id(event_headers):
     """
     Retrieve user_id from cookies if it exists, otherwise set and return it

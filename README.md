@@ -103,7 +103,7 @@ sudo apt-get install -y conntrack
 Arkade:
 
 ```bash
-curl -SLsf https://dl.get-arkade.dev/ | sudo sh
+curl -sLS https://get.arkade.dev | sudo sh
 ```
 
 Faas-cli:
@@ -131,7 +131,7 @@ Since we deploy the project to EC2 instance, here we choose not to use a driver 
 这个命令我没跑通
 
 ```bash
-arkade install openfaas --basic-auth-password password123 --set=faasIdler.dryRun=false
+arkade install openfaas --basic-auth-password admin --set=faasIdler.dryRun=false
 ```
 
 #### 下面这个我可以跑通
@@ -357,6 +357,12 @@ https://segmentfault.com/a/1190000023702396
 
 
 
+
+Step 3: Port-forward for Openfaas Gateway
+
+kubectl port-forward -n openfaas svc/gateway 8080:8080 --address=0.0.0.0 &
+
+An Openfaas gateway service(svc/gateway) is created on openfaas deployment in openfaas namespace, a port forwarding is necessary so that the openfaas functions can be accessed through {server_ip}:8080/function/{function_name}. Ensure the gateway service is ready before running this command. And always run this command in the background to keep it from occupying the terminal.
 
 
 #### Step 5: Deploy Frontend
