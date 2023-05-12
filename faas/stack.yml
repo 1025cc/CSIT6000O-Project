@@ -11,7 +11,7 @@ functions:
     build_args:
         TEST_ENABLED: false
     environment:
-        MONGODB_SERVICE_URL: 3.90.36.48
+        MONGODB_SERVICE_URL: 3.80.143.168
 
   completetodo:
     lang: python3-http
@@ -21,7 +21,7 @@ functions:
     build_args:
         TEST_ENABLED: false
     environment:
-        MONGODB_SERVICE_URL: 3.90.36.48
+        MONGODB_SERVICE_URL: 3.80.143.168
 
   deletetodo:
     lang: python3-http
@@ -31,7 +31,7 @@ functions:
     build_args:
         TEST_ENABLED: false
     environment:
-        MONGODB_SERVICE_URL: 3.90.36.48
+        MONGODB_SERVICE_URL: 3.80.143.168
 
   getalllist:
     lang: python3-http
@@ -41,6 +41,6 @@ functions:
     build_args:
         TEST_ENABLED: false
     environment:
-        MONGODB_SERVICE_URL: 3.90.36.48
+        MONGODB_SERVICE_URL: 3.80.143.168
 
 
