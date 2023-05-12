@@ -16,7 +16,7 @@ function App() {
   const [idToken, setIdToken] = useState('unchange');
   const [toDos, setToDos] = useState([]);
   let location = window.location.href;
-  let api = "http://ec2-54-237-215-46.compute-1.amazonaws.com/api";
+  let api = "http://ec2-52-90-60-135.compute-1.amazonaws.com/api";
 
   useEffect(() => {
     getIdToken();
