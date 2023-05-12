@@ -15,8 +15,6 @@ function App() {
   const [alertDismissable, setAlertDismissable] = useState(false);
   const [idToken, setIdToken] = useState('unchange');
   const [toDos, setToDos] = useState([]);
-  let location = window.location.href;
-  let api = "http://ec2-52-90-60-135.compute-1.amazonaws.com/api";
 
   useEffect(() => {
     getIdToken();
@@ -60,7 +58,7 @@ function App() {
 
   const getAllTodos = async () => {
     const result = await axios({
-      url: `${api}/getalllist/`,
+      url: `${process.env.REACT_APP_BACKEND_URL}/api/function/getalllist/`,
     })
     .then(response => {
       console.log('Response:', response);
@@ -98,7 +96,7 @@ function App() {
 
     const result = await axios({
       method: 'POST',
-      url: `${api}/addtodo/`,
+      url: `${process.env.REACT_APP_BACKEND_URL}/api/function/addtodo/`,
       data: newToDo
     }).catch(error => {
       console.log(error.response);
@@ -118,7 +116,7 @@ function App() {
 
     const result = await axios({
       method: 'DELETE',
-      url: `${api}/item/${itemId}`
+      url: `${process.env.REACT_APP_BACKEND_URL}/api/function/item/${itemId}`
     });
 
     if (result && result.status === 401) {
@@ -134,7 +132,7 @@ function App() {
 
     const result = await axios({
       method: 'POST',
-      url: `${api}/item/${itemId}/done`
+      url: `${process.env.REACT_APP_BACKEND_URL}/api/function/item/${itemId}/done`
     });
 
     if (result && result.status === 200) {
