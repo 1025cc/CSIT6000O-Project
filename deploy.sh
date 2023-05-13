@@ -3,7 +3,7 @@
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
 #check environment variables
 echo ${SCRIPT_DIR}
-echo ${SERVER_IP}
+echo $SERVER_IP
 
 echo "> Starting Minikube"
 minikube start --kubernetes-version=v1.22.0 HTTP_PROXY=https://minikube.sigs.k8s.io/docs/reference/networking/proxy/ --extra-config=apiserver.service-node-port-range=6000-32767 disk=20000MB --vm=true --driver=none
@@ -61,6 +61,6 @@ echo "> Deploying NGINX Ingress Controller "
 kubectl apply -f ${SCRIPT_DIR}/ingress.yml
 
 # done
-echo ">>>>>> Now you can visit our serverless application at:http://"${SERVER_IP}
+echo ">>>>>> Now you can visit our serverless application at:http://"$SERVER_IP
 
 
