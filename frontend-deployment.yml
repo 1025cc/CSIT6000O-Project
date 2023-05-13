@@ -22,4 +22,4 @@ spec:
         - containerPort: 8888
         env:
         - name: REACT_APP_BACKEND_URL
-          value: http://ec2-54-164-40-153.compute-1.amazonaws.com
+          value: http://serverless.todo.com
