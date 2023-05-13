@@ -34,6 +34,28 @@ For the test machine, we choose the following config:
 
 > **After the deployment, all the Openfaas functions can be accessed through {server_ip}:31112/ui/. The mongodb database can be accessed through {server_ip}:27017 with compass.And the Frontend Web App can be accessed through http://{server_ip}**
 
+## Automatic Deployment
+
+### Setup
+
+To setup the environment, you can use an automatic script on EC2 launch.
+
+```bash
+#!/bin/bash
+git clone https://github.com/hkust-6000o-2023s/course-project-cloud-explorers
+
+cd todolist
+sh setup.sh 2>&1 > /tmp/setup.log
+sudo sh deploy.sh 2>&1 > /tmp/deploy.log
+```
+
+The user data runs two scripts:
+
+- setup.sh: install minikube, kubectl, docker, socat, conntrack, arkade, faas-cli
+- deploy.sh: deploy openfass, custom openfaas functions, mongodb, frontend application
+
+The deploy script also exposes frontend application, mongodb database and openfaas gateway through ```kubectl port-forward```.
+
 ## Manual Deployment
 
 ### Setup
