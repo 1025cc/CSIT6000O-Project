@@ -175,7 +175,7 @@ echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 ```
 
 ```bash
-cd faas
+cd ${REPO_HOME}/faas
 ```
 
 OpenFaaS does not have a default python template, so pull the template it first. Then, compile the yml, push it to docker, and then pull down from docker to deploy.
@@ -198,7 +198,7 @@ faas-cli logs {function_name} --gateway http://{server_ip}:31112
 #### Step 3: Deploy Mongodb
 
 ```bash
-#enter the code repository
+#navigate to the code repository
 cd ${REPO_HOME}
 ```
 
@@ -255,42 +255,23 @@ kubectl apply -f frontend-service.yml
 kubectl apply -f ingress.yml
 ```
 
+## Build Docker Image
 
-> **After the deployment, all the Openfaas functions can be accessed through {SERVER_IP}:31112/ui/. And the Frontend Web App can be accessed through http://{SERVER_IP}**
+#### Preperation
 
-参考：
+Install Docker
 
-MongoDB：
+```bash
+sudo apt-get update && sudo apt-get install docker.io -y
+```
 
-https://blog.csdn.net/majiayu000/article/details/126491116
+Login Docker
 
-https://blog.csdn.net/qq_28550263/article/details/119892582
+```bash
+sudo docker login
+```
 
-https://www.panyanbin.com/article/c602b9e2.html
-
-https://juejin.cn/post/6844903597465927694
-
-https://blog.alexellis.io/serverless-databases-with-openfaas-and-mongo/
-
-openfass：
-
-https://mfarache.github.io/mfarache/Url-Shortener-with-openfaas/
-
-https://www.jianshu.com/p/6575a29840fd
-
-https://blog.csdn.net/qq_30038111/article/details/113902683
-
-https://blog.51cto.com/u_15064632/4317062
-
-https://blog.csdn.net/qq_30038111/article/details/113902683
-
-https://zhuanlan.zhihu.com/p/601314424
-
-https://segmentfault.com/a/1190000023702396
-
-
-
-#### How to make MongoDB into Docker
+#### How to Dokernize MongoDB 
 
 Pull the mongo image from official image.
 
@@ -330,4 +311,62 @@ Push it to the docker
 ```bash
 docker push {dockerHub repository url}:tagname
 ```
+
+#### How to Dockerize the React Application
+
+Navigate to the directory where the Dockerfile is located
+
+```bash
+cd ${REPO_HOME}/www
+```
+
+Build docker image
+
+```bash
+# when you build your image, remember to replace cccccci with your dockerhub username
+sudo docker build -t cccccci/todolist-frontend .
+```
+
+Run docker image (optional)
+
+```bash
+sudo docker run -d -p 80:8888 cccccci/todolist-frontend
+```
+
+Push docker image 
+
+```bash
+# also remember to use your own username
+sudo docker push cccccci/todolist-frontend
+```
+
+## Reference
+
+MongoDB：
+
+https://blog.csdn.net/majiayu000/article/details/126491116
+
+https://blog.csdn.net/qq_28550263/article/details/119892582
+
+https://www.panyanbin.com/article/c602b9e2.html
+
+https://juejin.cn/post/6844903597465927694
+
+https://blog.alexellis.io/serverless-databases-with-openfaas-and-mongo/
+
+OpenFass：
+
+https://mfarache.github.io/mfarache/Url-Shortener-with-openfaas/
+
+https://www.jianshu.com/p/6575a29840fd
+
+https://blog.csdn.net/qq_30038111/article/details/113902683
+
+https://blog.51cto.com/u_15064632/4317062
+
+https://blog.csdn.net/qq_30038111/article/details/113902683
+
+https://zhuanlan.zhihu.com/p/601314424
+
+https://segmentfault.com/a/1190000023702396
 
