@@ -28,7 +28,7 @@ mycol = mydb['list']
 def handle(event, context):
 
     request_payload = json.loads(event.body.decode('utf-8'))
-    item_id = request_payload["itemId"]
+    item_id = request_payload["id"]
     # content = request_payload["content"]
     user_id, _ = get_user_id(event.headers)
 
@@ -41,7 +41,7 @@ def handle(event, context):
 
     data = {
             "$set": {
-                "state":2
+                "complete":True
             }
         }
 

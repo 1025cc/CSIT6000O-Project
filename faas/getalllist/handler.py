@@ -40,13 +40,24 @@ def handle(event, context):
     else:
         q = {'pk':key_string}
         item_list = list(mycol.find(q))
-   # all_product = list(mycol.find())   
+  
+    # for item in item_list:
+    #     item.update(
+    #         (k, v.replace("item#", "")) for k, v in item.items() if k == "sk"
+    #     )
+
+    formatted_items=[]
     for item in item_list:
-        item.update(
-            (k, v.replace("item#", "")) for k, v in item.items() if k == "sk"
-        )
+        formatted_item = {
+            "id": item["sk"].replace("item#", ""),
+            "item": item["content"],
+            "completed": item["complete"]
+        }
+        formatted_items.append(formatted_item)
+
+
     return {
         "statusCode": 200,
         "headers": get_headers(user_id),
-        "body": json.dumps({"items": item_list, "message": "show all item"}, default = str)
+        "body": json.dumps({"items": formatted_items, "message": "show all item"}, default = str)
     }

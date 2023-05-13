@@ -28,7 +28,7 @@ mycol = mydb['list']
 def handle(event, context):
 
     request_payload = json.loads(event.body.decode('utf-8'))
-    item_id = request_payload["itemId"]
+    item_id = request_payload["id"]
     # content = request_payload["content"]
     user_id, _ = get_user_id(event.headers)
 
@@ -39,13 +39,15 @@ def handle(event, context):
         "sk": f"item#{item_id}",
     }
 
-    data = {
-            "$set": {
-                "state":3
-            }
-        }
+    # data = {
+    #         "$set": {
+    #             "state":3
+    #         }
+    #     }
 
-    mycol.update_one(key, data)
+    # mycol.update_one(key, data)
+
+    mycol.delete_one(key)
 
     return {
             "statusCode": 200,

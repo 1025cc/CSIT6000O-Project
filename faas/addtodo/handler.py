@@ -31,16 +31,26 @@ def handle(event, context):
     """
     request_payload = json.loads(event.body.decode('utf-8'))
     # print(request_payload)
-    item_id = request_payload["itemId"]
-    content = request_payload["content"]
+    content = request_payload["item"]
     user_id, _ = get_user_id(event.headers)
 
     pk = f"user#{user_id}"
 
+    # Aggregate to get the max item id for the user
+    pipeline = [
+        {"$match": {"pk": pk, "sk": {"$regex": "^item#"}}},
+        {"$group": {"_id": "$pk", "max_item_id": {"$max": {"$substr": ["$sk", 5, -1]}}}}
+    ]
+    result = mycol.aggregate(pipeline)
+    max_item_id = int(result.next()["max_item_id"]) if result.alive else 0
+
+    item_id = max_item_id + 1
+
+
     item = {
         "pk": pk,
         "sk": f"item#{item_id}",
-        "state":1,
+        "complete":False,
         "content": content
     }
 
