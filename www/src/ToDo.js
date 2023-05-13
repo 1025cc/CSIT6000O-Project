@@ -14,16 +14,16 @@ function ToDo({ toDos, addToDo, deleteToDo, completeToDo }) {
     <div className="ToDo">
       <Row>
         <Col xs="12" className="mt-1 mb-1">
-          <Form inline>
-            <FormGroup>
+          <Form inline className='d-flex justify-content-between'>
+            <FormGroup className='flex-grow-1 mr-2'>
               <Label for="newToDo" hidden>ToDo</Label>
-              <Input type="text" name="todo" id="newToDo" placeholder="new item" />
+              <Input type="text" name="todo" id="newToDo" placeholder="new item" className='w-100'/>
             </FormGroup>
             <Button onClick={addToDo} color="primary" className="ml-1">Add</Button>
           </Form>
         </Col>
         <Col xs="12" className="mt-1 mb-1">
-          <ButtonGroup>
+          <ButtonGroup className='w-100'>
             <Button onClick={(e) => changeFilter('all')} color={(filter === 'all') ? 'primary' : 'secondary'}>All</Button>
             <Button onClick={(e) => changeFilter('complete')} color={(filter === 'complete') ? 'primary' : 'secondary'}>Complete</Button>
             <Button onClick={(e) => changeFilter('incomplete')} color={(filter === 'incomplete') ? 'primary' : 'secondary'}>Incomplete</Button>
