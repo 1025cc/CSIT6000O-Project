@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd)
+#check environment variables
+echo ${SCRIPT_DIR}
+echo ${SERVER_IP}
 
 echo "> Starting Minikube"
 minikube start --kubernetes-version=v1.22.0 HTTP_PROXY=https://minikube.sigs.k8s.io/docs/reference/networking/proxy/ --extra-config=apiserver.service-node-port-range=6000-32767 disk=20000MB --vm=true --driver=none
@@ -8,15 +11,17 @@ minikube start --kubernetes-version=v1.22.0 HTTP_PROXY=https://minikube.sigs.k8s
 echo "> Enabling Nginx Ingress Controller"
 minikube addons enable ingress
 
-sleep 5
-
 echo "> Installing openfaas"
 arkade install openfaas --basic-auth-password password123 --set=faasIdler.dryRun=false
 
 echo "> Waiting until openfaas gateway is ready"
 kubectl rollout status -n openfaas deploy/gateway
 
-sleep 5
+# Loop until the openfaas gateway is ready
+until kubectl get pods -n openfaas | grep gateway | grep Running; do
+    sleep 2
+done
+
 
 echo "> Port forwarding for openfaas gateway"
 kubectl port-forward -n openfaas svc/gateway 8080:8080 --address=0.0.0.0 &
@@ -26,14 +31,10 @@ while ! nc -z localhost 8080; do
 	sleep 1
 done
 
-sleep 5
-
 echo "> Logging in to faas-cli"
 PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
 echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 # faas-cli login --username admin --password password123
-
-sleep 5
 
 echo "> Deploying openfaas functions"
 cd ${SCRIPT_DIR}/faas
@@ -50,8 +51,14 @@ echo "> Deploying frontend"
 kubectl apply -f ${SCRIPT_DIR}/frontend-deployment.yml
 kubectl apply -f ${SCRIPT_DIR}/frontend-service.yml
 
+# Loop until the openfaas gateway is ready
+until kubectl get pods -n ingress-nginx | grep ingress-nginx-controller | grep Running; do
+    echo "Loop until the nginx ingress controller is ready"
+	sleep 2
+done
+
 echo "> Deploying NGINX Ingress Controller "
-kubectl apply -f ingress.yml
+kubectl apply -f ${SCRIPT_DIR}/ingress.yml
 
 # done
 echo ">>>>>> Now you can visit our serverless application at:http://"${SERVER_IP}
