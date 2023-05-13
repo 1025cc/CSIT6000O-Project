@@ -59,6 +59,7 @@ function App() {
   const getAllTodos = async () => {
     const result = await axios({
       url: `${process.env.REACT_APP_BACKEND_URL}/function/getalllist/`,
+      withCredentials: true
     })
     .then(response => {
       console.log('Response:', response);
@@ -93,7 +94,8 @@ function App() {
     const result = await axios({
       method: 'POST',
       url: `${process.env.REACT_APP_BACKEND_URL}/function/addtodo/`,
-      data: newToDo
+      data: newToDo,
+      withCredentials: true
     }).catch(error => {
       console.log(error.response);
     });
@@ -112,7 +114,8 @@ function App() {
 
     const result = await axios({
       method: 'DELETE',
-      url: `${process.env.REACT_APP_BACKEND_URL}/function/deletetodo/${itemId}`
+      url: `${process.env.REACT_APP_BACKEND_URL}/function/deletetodo/${itemId}`,
+      withCredentials: true
     });
 
     if (result && result.status === 401) {
@@ -128,7 +131,8 @@ function App() {
 
     const result = await axios({
       method: 'POST',
-      url: `${process.env.REACT_APP_BACKEND_URL}/function/completetodo/${itemId}`
+      url: `${process.env.REACT_APP_BACKEND_URL}/function/completetodo/${itemId}`,
+      withCredentials: true
     });
 
     if (result && result.status === 200) {
