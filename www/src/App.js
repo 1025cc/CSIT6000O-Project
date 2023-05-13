@@ -58,7 +58,7 @@ function App() {
 
   const getAllTodos = async () => {
     const result = await axios({
-      url: `${process.env.REACT_APP_BACKEND_URL}/function/getalllist/`,
+      url: `/function/getalllist/`,
       withCredentials: true
     })
     .then(response => {
@@ -93,7 +93,7 @@ function App() {
 
     const result = await axios({
       method: 'POST',
-      url: `${process.env.REACT_APP_BACKEND_URL}/function/addtodo/`,
+      url: `/function/addtodo/`,
       data: newToDo,
       withCredentials: true
     }).catch(error => {
@@ -116,7 +116,7 @@ function App() {
     };
     const result = await axios({
       method: 'POST',
-      url: `${process.env.REACT_APP_BACKEND_URL}/function/deletetodo/`,
+      url: `/function/deletetodo/`,
       withCredentials: true,
       data: delToDo
     });
@@ -136,7 +136,7 @@ function App() {
     };
     const result = await axios({
       method: 'POST',
-      url: `${process.env.REACT_APP_BACKEND_URL}/function/completetodo/`,
+      url: `/function/completetodo/`,
       withCredentials: true,
       data: comToDo
     });

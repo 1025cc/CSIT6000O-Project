@@ -20,6 +20,3 @@ spec:
         image: cccccci/todolist-frontend:latest
         ports:
         - containerPort: 8888
-        env:
-        - name: REACT_APP_BACKEND_URL
-          value: http://serverless.todo.com
