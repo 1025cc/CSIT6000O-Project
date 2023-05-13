@@ -121,7 +121,7 @@ arkade install openfaas --set=faasIdler.dryRun=false
 
 You can always use the following command to get the admin password for openfaas.
 
-```
+```bash
 echo $(kubectl -n openfaas get secret basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode)
 ```
 
@@ -157,7 +157,7 @@ If you want to visualize the MongoDB, you can install [MongoDB Compass](https://
 
 Port-forward for MongoDB to port 27017.
 
-```
+```bash
 kubectl port-forward -n openfaas-fn svc/mongodb-service 27017:27017 --address=0.0.0.0 &
 ```
 
@@ -205,7 +205,7 @@ faas-cli logs {function_name} --gateway http://{server_ip}:31112
 
 Port-forward for Openfaas Gateway to port 8080.
 
-```
+```bash
 kubectl port-forward -n openfaas svc/gateway 8080:8080 --address=0.0.0.0 &
 ```
 
@@ -272,3 +272,49 @@ kubectl port-forward -n openfaas-fn svc/frontend-service 80:8080 --address=0.0.0
 ```
 
 An frontend service(`svc/frontend-service`) is created on frontend deployment in `openfaas-fn` namespace, a port forwarding is necessary so that the web application can be accessed through `http://{server_ip}`. Ensure the frontend service is ready before running this command. And always run this command in the background to keep it from occupying the terminal.
+
+
+
+
+
+#### How to make MongoDB into Docker
+
+Pull the mongo image from official image.
+
+```bash
+docker pull mongo:4.0.4
+```
+
+Build a container
+
+```bash
+docker run -it --name faas-mongodb \
+-e MONGO_INITDB_ROOT_USERNAME=admin \
+-e  MONGO_INITDB_ROOT_PASSWORD=admin \
+-p 10001:27017 -d mongo:4.0.4
+```
+
+Get into container
+
+```bash
+docker exec -it faas-mongodb mongo
+```
+
+Then you can make adjustments to the MongoDB database
+
+```bash
+docker commit faas-mongodb imagesId
+```
+
+Tag
+
+```bash
+docker tag imagesId {dockerHub repository url}:tagname
+```
+
+Push it to the docker
+
+```bash
+docker push {dockerHub repository url}:tagname
+```
+
