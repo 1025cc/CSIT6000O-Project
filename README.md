@@ -4,7 +4,7 @@ CSIT6000o Project - Serverless To Do List Application
 
 | Name    | SID      | ITSC   | CONTRIBUTION                                                 |
 | ------- | -------- | ------ | ------------------------------------------------------------ |
-| PAN Han | 20881280 | hpanan | Openfaas functions, Replace DynamoDB with MongoDB， Kubernetes deployment, Automation scripts |
+| PAN Han | 20881280 | hpanan@connect.ust.hk | Openfaas functions, Replace DynamoDB with MongoDB， Kubernetes deployment, Automation scripts |
 |         |          |        | Modified and built frontend service                          |
 |         |          |        |                                                              |
 |         |          |        |                                                              |
