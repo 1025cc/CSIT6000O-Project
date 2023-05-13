@@ -2,12 +2,12 @@
 
 CSIT6000o Project - Serverless To Do List Application
 
-| Name    | SID      | ITSC   | CONTRIBUTION                                                 |
-| ------- | -------- | ------ | ------------------------------------------------------------ |
-| PAN Han | 20881280 | hpanan@connect.ust.hk | Openfaas functions, Replace DynamoDB with MongoDB， Kubernetes deployment, Automation scripts |
-|         |          |        | Modified and built frontend service                          |
-|         |          |        |                                                              |
-|         |          |        |                                                              |
+| Name      | SID      | ITSC    | CONTRIBUTION                                                 |
+| --------- | -------- | ------- | ------------------------------------------------------------ |
+| PAN Han   | 20881280 | hpanan  | Openfaas functions, Replace DynamoDB with MongoDB， Kubernetes deployment, Automation scripts |
+| CHEN Chen | 20881450 | cchencu | Modify,build and deploy frontend service, Replace API Gateway with NGINX Ingress Controller, Automation scripts |
+|           |          |         |                                                              |
+|           |          |         |                                                              |
 
 ## Background
 
@@ -75,7 +75,8 @@ To setup the environment, some packages need to be installed.
 Installation Commands:
 
 > **_NOTE:_** These commands are only tested on Ubuntu 22.04 TLS platform
-> Minikube:
+
+Minikube:
 
 ```bash
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
@@ -123,7 +124,7 @@ curl -sL https://cli.openfaas.com | sudo sh
 
 > **_NOTE:_** **This part needs to be run as the root user**
 >
-> sudo -i
+> `sudo -i`
 
 #### Step 1: Start Minikube
 
@@ -133,44 +134,37 @@ minikube start --kubernetes-version=v1.22.0 HTTP_PROXY=https://minikube.sigs.k8s
 
 Sometimes minikube fails to start. `minikube delete` can helps.
 
+Enable the NGINX Ingress controller in a Minikube cluster.
+
+```bash
+minikube addons enable ingress
+```
+
+Verify that the NGINX Ingress controller is running(should wait for a while).
+
+```bash
+kubectl get pods -n ingress-nginx
+```
+
 #### Step 2: Deploy Openfaas
 
 This simple command will install openfaas but it will generate random password.
 
 ```bash
-arkade install openfaas --set=faasIdler.dryRun=false
+arkade install openfaas --set=faasIdler.dryRun=false 
 ```
-
-You can always use the following command to get the admin password for openfaas.
-
-```bash
-echo $(kubectl -n openfaas get secret basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode)
-```
-
-Here is another few commands to install openfaas. I prefer this, but it is a little complex. You can set you own user and password.
-
-```bash
-git clone https://github.com/openfaas/faas-netes
-cd faas-netes
-kubectl apply -f namespaces.yml
-kubectl -n openfaas create secret generic basic-auth \
-    --from-literal=basic-auth-user=admin \
-    --from-literal=basic-auth-password=password123
-kubectl apply -f ./yaml/
-```
-
-The user and password is used for `faas-cli` to login later. 
 
 #### Step 3: Deploy Mongodb
 
 ```bash
-cd todolist
+#enter the code repository
+cd ${REPO_HOME}
 ```
 
 An mongodb-service is created in openfaas-fn namespace.
 
 ```bash
-kubectl apply -f ${REPO_HOME}/mongodb.yml
+kubectl apply -f mongodb.yml
 ```
 
 **Visualize MongoDB**
@@ -197,11 +191,18 @@ After connection, you can see
 
 #### Step 4: Deploy Openfaas Functions
 
-Login in faas-cli
+Forward traffic from port 8080 of the local machine to port 8080 of the `gateway` service, allowing you to access the service locally. Ensure the gateway service is ready before running this command. And always run this command in the background to keep it from occupying the terminal.
 
 ```bash
-export OPENFAAS_URL=54.221.132.100 
-faas-cli login -u admin -p password123 --gateway http://54.221.132.100:31112
+kubectl rollout status -n openfaas deploy/gateway
+kubectl port-forward -n openfaas svc/gateway 8080:8080 &
+```
+
+Gain the random generated password and login in faas-cli
+
+```bash
+PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
+echo -n $PASSWORD | faas-cli login --username admin --password-stdin
 ```
 
 ```bash
@@ -214,7 +215,7 @@ OpenFaaS does not have a default python template, so pull the template it first.
 faas-cli template store pull python3-http
 faas-cli build -f stack.yml
 faas-cli push -f stack.yml
-faas-cli deploy -f stack.yml --gateway http://{server_ip}:31112
+faas-cli deploy -f stack.yml
 ```
 
 Then you can access http://{server_ip}:31112 to test the backend service.
@@ -225,19 +226,30 @@ If you get an error, you can use this command to see the log.
 faas-cli logs {function_name} --gateway http://{server_ip}:31112
 ```
 
-Port-forward for Openfaas Gateway to port 8080.
+#### Step 5: Deploy Frontend
 
 ```bash
-kubectl port-forward -n openfaas svc/gateway 8080:8080 --address=0.0.0.0 &
+#enter the code repository
+cd ${REPO_HOME}
 ```
 
-An Openfaas gateway service(svc/gateway) is created on openfaas deployment in openfaas namespace, a port forwarding is necessary so that the openfaas functions can be accessed through {server_ip}:8080/function/{function_name}. Ensure the gateway service is ready before running this command. And always run this command in the background to keep it from occupying the terminal.
+This command creates a Deployment resource as described in the `frontend-deployment.yml` file. This Deployment is used to manage a set of replicas of a Pod, which runs your application.
 
+```bash
+kubectl apply -f frontend-deployment.yml
+```
 
+This command creates  a Service resource as described in the `frontend-service.yml` file. The Service provides network access to one or more sets of Pods, in this case likely the Pods managed by the Deployment created in the previous command.
 
+```bash
+kubectl apply -f frontend-service.yml
+```
 
+#### Step 6: Deploy NGINX Ingress Controller 
 
-
+```bash
+kubectl apply -f ingress.yml
+```
 
 
 > **After the deployment, all the Openfaas functions can be accessed through {server_ip}:31112/ui/. And the Frontend Web App can be accessed through http://{server_ip}**
@@ -275,25 +287,6 @@ https://blog.csdn.net/qq_30038111/article/details/113902683
 https://zhuanlan.zhihu.com/p/601314424
 
 https://segmentfault.com/a/1190000023702396
-
-
-
-
-#### Step 5: Deploy Frontend
-
-```bash
-kubectl apply -f ${REPO_HOME}/frontend.yml
-```
-
-Ensure the openfaas deployment finished and a namespace `openfaas-fn` exists before deploying the frontend app.
-
-#### Step 6: Port-forward for Frontend Web App
-
-```bash
-kubectl port-forward -n openfaas-fn svc/frontend-service 80:8080 --address=0.0.0.0 &
-```
-
-An frontend service(`svc/frontend-service`) is created on frontend deployment in `openfaas-fn` namespace, a port forwarding is necessary so that the web application can be accessed through `http://{server_ip}`. Ensure the frontend service is ready before running this command. And always run this command in the background to keep it from occupying the terminal.
 
 
 
