@@ -58,7 +58,7 @@ function App() {
 
   const getAllTodos = async () => {
     const result = await axios({
-      url: `${process.env.REACT_APP_BACKEND_URL}/api/function/getalllist/`,
+      url: `${process.env.REACT_APP_BACKEND_URL}/function/getalllist/`,
     })
     .then(response => {
       console.log('Response:', response);
@@ -75,9 +75,7 @@ function App() {
       clearCredentials();
     } else if (result && result.status === 200) {
       console.log(result.data.items);
-      const contents = result.data.items.map(item => item.content);
-      console.log(contents); 
-      setToDos(contents)
+      setToDos(result.data.items)
     }
   };
 
@@ -89,14 +87,12 @@ function App() {
 
     const newToDo = {
       "item": item,
-      "completed": false,
-      "itemId":"1",
-      "content":item
+      "completed": false
     };
 
     const result = await axios({
       method: 'POST',
-      url: `${process.env.REACT_APP_BACKEND_URL}/api/function/addtodo/`,
+      url: `${process.env.REACT_APP_BACKEND_URL}/function/addtodo/`,
       data: newToDo
     }).catch(error => {
       console.log(error.response);
@@ -116,7 +112,7 @@ function App() {
 
     const result = await axios({
       method: 'DELETE',
-      url: `${process.env.REACT_APP_BACKEND_URL}/api/function/item/${itemId}`
+      url: `${process.env.REACT_APP_BACKEND_URL}/function/deletetodo/${itemId}`
     });
 
     if (result && result.status === 401) {
@@ -132,7 +128,7 @@ function App() {
 
     const result = await axios({
       method: 'POST',
-      url: `${process.env.REACT_APP_BACKEND_URL}/api/function/item/${itemId}/done`
+      url: `${process.env.REACT_APP_BACKEND_URL}/function/completetodo/${itemId}`
     });
 
     if (result && result.status === 200) {

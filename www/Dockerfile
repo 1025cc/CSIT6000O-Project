@@ -9,7 +9,9 @@ ENV REACT_APP_BACKEND_URL=$REACT_APP_BACKEND_URL
 RUN npm run build
 
 # Run stage
-FROM nginx:stable-alpine
-COPY --from=build /app/build /usr/share/nginx/html
+FROM node:14
+WORKDIR /app
+COPY --from=build /app/build ./build
+RUN npm install -g http-server
 EXPOSE 8888
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["http-server", "build", "-p", "8888"]
