@@ -43,7 +43,9 @@ To setup the environment, you can use an automatic script on EC2 launch.
 ```bash
 #!/bin/bash
 git clone https://github.com/hkust-6000o-2023s/course-project-cloud-explorers
-
+#set environment variables 
+#public network ip of your EC2 instance
+export SERVER_IP={remember to replace}
 cd todolist
 sh setup.sh 2>&1 > /tmp/setup.log
 sudo sh deploy.sh 2>&1 > /tmp/deploy.log
@@ -52,9 +54,9 @@ sudo sh deploy.sh 2>&1 > /tmp/deploy.log
 The user data runs two scripts:
 
 - setup.sh: install minikube, kubectl, docker, socat, conntrack, arkade, faas-cli
-- deploy.sh: deploy openfass, custom openfaas functions, mongodb, frontend application
+- deploy.sh: deploy openfass, custom openfaas functions, mongodb, nginx ingress controller and frontend application
 
-The deploy script also exposes frontend application, mongodb database and openfaas gateway through ```kubectl port-forward```.
+The deploy script also exposes mongodb database through ```kubectl port-forward```.
 
 ## Manual Deployment
 
@@ -146,12 +148,52 @@ Verify that the NGINX Ingress controller is running(should wait for a while).
 kubectl get pods -n ingress-nginx
 ```
 
-#### Step 2: Deploy Openfaas
+#### Step 2: Deploy Openfaas Functions
 
 This simple command will install openfaas but it will generate random password.
 
 ```bash
 arkade install openfaas --set=faasIdler.dryRun=false 
+```
+
+Ensure the gateway service is ready before running the next command. 
+
+```bash
+kubectl rollout status -n openfaas deploy/gateway
+```
+
+Forward traffic from port 8080 of the local machine to port 8080 of the `gateway` service, allowing you to access the service locally. And always run this command in the background to keep it from occupying the terminal.
+
+```bash
+kubectl port-forward -n openfaas svc/gateway 8080:8080 &
+```
+
+Gain the random generated password and login in faas-cli
+
+```bash
+PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
+echo -n $PASSWORD | faas-cli login --username admin --password-stdin
+```
+
+```bash
+cd faas
+```
+
+OpenFaaS does not have a default python template, so pull the template it first. Then, compile the yml, push it to docker, and then pull down from docker to deploy.
+
+```bash
+faas-cli template store pull python3-http
+faas-cli build -f stack.yml
+faas-cli push -f stack.yml
+faas-cli deploy -f stack.yml
+```
+
+Then you can access http://{server_ip}:31112 to test the backend service.
+
+If you get an error, you can use this command to see the log.
+
+```bash
+faas-cli logs {function_name} --gateway http://{server_ip}:31112
 ```
 
 #### Step 3: Deploy Mongodb
@@ -189,44 +231,7 @@ After connection, you can see
 
 ![image-20230513164917907](images/mongodb.png)
 
-#### Step 4: Deploy Openfaas Functions
-
-Forward traffic from port 8080 of the local machine to port 8080 of the `gateway` service, allowing you to access the service locally. Ensure the gateway service is ready before running this command. And always run this command in the background to keep it from occupying the terminal.
-
-```bash
-kubectl rollout status -n openfaas deploy/gateway
-kubectl port-forward -n openfaas svc/gateway 8080:8080 &
-```
-
-Gain the random generated password and login in faas-cli
-
-```bash
-PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
-echo -n $PASSWORD | faas-cli login --username admin --password-stdin
-```
-
-```bash
-cd faas
-```
-
-OpenFaaS does not have a default python template, so pull the template it first. Then, compile the yml, push it to docker, and then pull down from docker to deploy.
-
-```bash
-faas-cli template store pull python3-http
-faas-cli build -f stack.yml
-faas-cli push -f stack.yml
-faas-cli deploy -f stack.yml
-```
-
-Then you can access http://{server_ip}:31112 to test the backend service.
-
-If you get an error, you can use this command to see the log.
-
-```bash
-faas-cli logs {function_name} --gateway http://{server_ip}:31112
-```
-
-#### Step 5: Deploy Frontend
+#### Step 4: Deploy Frontend
 
 ```bash
 #enter the code repository
@@ -245,18 +250,14 @@ This command creates  a Service resource as described in the `frontend-service.y
 kubectl apply -f frontend-service.yml
 ```
 
-#### Step 6: Deploy NGINX Ingress Controller 
+#### Step 5: Deploy NGINX Ingress Controller 
 
 ```bash
 kubectl apply -f ingress.yml
 ```
 
 
-> **After the deployment, all the Openfaas functions can be accessed through {server_ip}:31112/ui/. And the Frontend Web App can be accessed through http://{server_ip}**
-
-
-
-
+> **After the deployment, all the Openfaas functions can be accessed through {SERVER_IP}:31112/ui/. And the Frontend Web App can be accessed through http://{SERVER_IP}**
 
 参考：
 
@@ -287,8 +288,6 @@ https://blog.csdn.net/qq_30038111/article/details/113902683
 https://zhuanlan.zhihu.com/p/601314424
 
 https://segmentfault.com/a/1190000023702396
-
-
 
 
 
