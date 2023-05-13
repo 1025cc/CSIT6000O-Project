@@ -24,7 +24,9 @@ done
 sleep 5
 
 echo "> Logging in to faas-cli"
-faas-cli login --username admin --password password123
+PASSWORD=$(kubectl get secret -n openfaas basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode; echo)
+echo -n $PASSWORD | faas-cli login --username admin --password-stdin
+# faas-cli login --username admin --password password123
 
 echo "> Deploying mongodb"
 kubectl apply -f ${SCRIPT_DIR}/mongodb.yml
