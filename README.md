@@ -113,11 +113,11 @@ Sometimes minikube fails to start. `minikube delete` can helps.
 
 #### Step 2: Deploy Openfaas
 
+This simple command will install openfaas but it will generate random password.
+
 ```bash
 arkade install openfaas --set=faasIdler.dryRun=false
 ```
-
-This simple command will install openfaas but it will generate random password.
 
 You can always use the following command to get the admin password for openfaas.
 
@@ -145,11 +145,11 @@ The user and password is used for `faas-cli` to login later.
 cd todolist
 ```
 
+An mongodb-service is created in openfaas-fn namespace.
+
 ```bash
 kubectl apply -f ${REPO_HOME}/mongodb.yml
 ```
-
-An mongodb-service is created in openfaas-fn namespace.
 
 **Visualize MongoDB**
 
