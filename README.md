@@ -1,23 +1,23 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-24ddc0f5d75046c5622901739e7c5dd533143b0c8e959d652212380cedb1ea36.svg)](https://classroom.github.com/a/Ha6DivV4)
 
-CSIT6000o Project - Serverless TODOList
+CSIT6000o Project - Serverless To Do List Application
 
 | Name    | SID      | ITSC   | CONTRIBUTION                                                 |
 | ------- | -------- | ------ | ------------------------------------------------------------ |
-| PAN Han | 20881280 | hpanan | Openfaas functions, Kubernetes deployment, Automation scripts |
+| PAN Han | 20881280 | hpanan | Openfaas functions, Replace DynamoDB with MongoDB， Kubernetes deployment, Automation scripts |
 |         |          |        | Modified and built frontend service                          |
-|         |          |        | Replace DynamoDB with MongoDB                                |
+|         |          |        |                                                              |
 |         |          |        |                                                              |
 
 ## Background
 
-This project derives from the serverless shopping cart project from AWS Sample: [https://github.com/aws-samples/aws-serverless-shopping-cart](https://github.com/aws-samples/aws-serverless-shopping-cart). We use Openfaas to replace AWS Lambda functions and MongoDB to replace AWS DynamoDB.
+This project derives from the serverless web application from AWS Sample: https://github.com/aws-samples/lambda-refarch-webapp. We use OpenFaas to replace AWS Lambda functions, MongoDB to replace AWS DynamoDB and Nginx to replace AWS API Gateway.
 
 ## Infrastructure
 
-The project is ready for deployment to a kubernetes cluster. To make the deployment simple enough, we build some automation script to deploy the project to a single-node Minikube cluster built on an AWS EC2 machine. The EC2 instance should expose the HTTP port 80 for frontend web application and port 8080 for openfaas functions. The deployments include a MongoDB database, several openfaas functions and a JavaScript Vue Frontend application. All of these are deployed to the same namespace in the Kubernetes cluster: openfaas-fn. The infrastructure is illustrated by the figure below.
+The project is ready for deployment to a kubernetes cluster. To make the deployment simple enough, we build some automation script to deploy the project to a single-node Minikube cluster built on an AWS EC2 machine. The EC2 instance should expose the HTTP port 80 for frontend web application and port 8080 for OpenFaas functions. The deployments include a MongoDB database, several OpenFaas functions and a React Frontend application. All of these are deployed to the same namespace in the Kubernetes cluster: openfaas-fn. The infrastructure is illustrated by the figure below:
 
-![](https://i.ibb.co/nDm3ZzL/infra-drawio-1.png)
+此处应有图。
 
 ## Deploy to an AWS EC2 instance
 
@@ -32,33 +32,7 @@ For the test machine, we choose the following config:
 | SG            | TCP Ports: 22, 80, 8080 From: Anywhere |
 | Storage       | 30GiB gp3 on Root volume               |
 
-
-
 > **After the deployment, all the Openfaas functions can be accessed through {server_ip}:31112/ui/. The mongodb database can be accessed through {server_ip}:27017 with compass.And the Frontend Web App can be accessed through http://{server_ip}**
-
-![](https://i.ibb.co/w4Dc9MH/deploy.png)
-
-## Automatic Deployment
-
-### Setup
-
-To setup the environment, you can use an automatic script on EC2 launch.
-
-```bash
-#!/bin/bash
-git clone https://github.com/yutong-niu/csit6000o-proj.git
-
-cd todolist
-sh setup.sh 2>&1 > /tmp/setup.log
-sudo /var/proj/deploy.sh 2>&1 > /tmp/deploy.log
-```
-
-The user data runs two scripts:
-
-- setup.sh: install minikube, kubectl, docker, socat, conntrack, arkade, faas-cli
-- deploy.sh: deploy openfass, custom openfaas functions, mongodb, frontend application
-
-The deploy script also exposes frontend application, mongodb database and openfaas gateway through ```kubectl port-forward```.
 
 ## Manual Deployment
 
@@ -135,63 +109,84 @@ curl -sL https://cli.openfaas.com | sudo sh
 minikube start --kubernetes-version=v1.22.0 HTTP_PROXY=https://minikube.sigs.k8s.io/docs/reference/networking/proxy/ --extra-config=apiserver.service-node-port-range=6000-32767 disk=20000MB --vm=true --driver=none
 ```
 
-Since we deploy the project to EC2 instance, here we choose not to use a driver for minikube. Sometimes minikube fails to start. A `minikube delete` is necessary before `minikube start --driver=none`. And the minikube will automatically configure kubectl, only if `kubectl` is installed ahead of `minikube start`. Please ensure `kubectl` is installed before running this command.
+Sometimes minikube fails to start. `minikube delete` can helps.
 
 #### Step 2: Deploy Openfaas
 
 ```bash
-arkade install openfaas --basic-auth-password password123 --set=faasIdler.dryRun=false
+arkade install openfaas --set=faasIdler.dryRun=false
 ```
 
-Here we use a command line option `basic-auth-password` for simplicity, but this is a deprecated method. The password is used for `faas-cli` to login later. You can always use `kubectl -n openfaas get secret basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode` to get the admin password for openfaas.
+This simple command will install openfaas but it will generate random password.
 
+You can always use the following command to get the admin password for openfaas.
 
+```
+echo $(kubectl -n openfaas get secret basic-auth -o jsonpath="{.data.basic-auth-password}" | base64 --decode)
+```
 
-#### Step 4: Deploy Mongodb
+Here is another few commands to install openfaas. I prefer this, but it is a little complex. You can set you own user and password.
+
+```bash
+git clone https://github.com/openfaas/faas-netes
+cd faas-netes
+kubectl apply -f namespaces.yml
+kubectl -n openfaas create secret generic basic-auth \
+    --from-literal=basic-auth-user=admin \
+    --from-literal=basic-auth-password=password123
+kubectl apply -f ./yaml/
+```
+
+The user and password is used for `faas-cli` to login later. 
+
+#### Step 3: Deploy Mongodb
+
+```bash
+cd todolist
+```
 
 ```bash
 kubectl apply -f ${REPO_HOME}/mongodb.yml
 ```
 
-可以下载compass 查看数据库
+An mongodb-service is created in openfaas-fn namespace.
 
-转发到27017
+**Visualize MongoDB**
+
+If you want to visualize the MongoDB, you can install [MongoDB Compass](https://www.mongodb.com/products/compass). This is not necessary.
+
+Port-forward for MongoDB to port 27017.
 
 ```
 kubectl port-forward -n openfaas-fn svc/mongodb-service 27017:27017 --address=0.0.0.0 &
 ```
 
-链接数据库的string
+ A port forwarding is necessary so that the MongoDB Compass can access through http://{server_ip}:27017. Ensure the mongodb-service is ready before running this command. And always run this command in the background to keep it from occupying the terminal.
+
+Here is the string to connect to the MongoDB.
 
 ```bash
-mongodb://admin:admin@54.86.120.210:27017/?authMechanism=DEFAULT
-
 mongodb://admin:admin@{server_ip}:27017/?authMechanism=DEFAULT
 ```
 
-#### 
+After connection, you can see
 
-#### Step 7: Deploy Openfaas Functions
+![image-20230513164917907](C:\Users\Alice\AppData\Roaming\Typora\typora-user-images\image-20230513164917907.png)
 
-登录
+#### Step 4: Deploy Openfaas Functions
+
+Login in faas-cli
 
 ```bash
-export OPENFAAS_URL={server_ip}
-faas-cli login -u admin -p password123 --gateway http://{server_ip}:31112
-
 export OPENFAAS_URL=54.221.132.100 
 faas-cli login -u admin -p password123 --gateway http://54.221.132.100:31112
 ```
 
-进入stack.yml的文件夹
-
 ```bash
-cd ${REPO_HOME}/faas
+cd faas
 ```
 
-openfaas没有默认的python模板，所以先pull
-
-后面是编译，push到docker上，再从docker上拉下来部署。
+OpenFaaS does not have a default python template, so pull the template it first. Then, compile the yml, push it to docker, and then pull down from docker to deploy.
 
 ```bash
 faas-cli template store pull python3-http
@@ -200,23 +195,27 @@ faas-cli push -f stack.yml
 faas-cli deploy -f stack.yml --gateway http://{server_ip}:31112
 ```
 
+Then you can access http://{server_ip}:31112 to test the backend service.
 
-
-报错的话可以用这个命令
+If you get an error, you can use this command to see the log.
 
 ```bash
 faas-cli logs {function_name} --gateway http://{server_ip}:31112
 ```
 
-Step 3: Port-forward for Openfaas Gateway
-
-转发功能到8080
+Port-forward for Openfaas Gateway to port 8080.
 
 ```
 kubectl port-forward -n openfaas svc/gateway 8080:8080 --address=0.0.0.0 &
 ```
 
 An Openfaas gateway service(svc/gateway) is created on openfaas deployment in openfaas namespace, a port forwarding is necessary so that the openfaas functions can be accessed through {server_ip}:8080/function/{function_name}. Ensure the gateway service is ready before running this command. And always run this command in the background to keep it from occupying the terminal.
+
+
+
+
+
+
 
 
 > **After the deployment, all the Openfaas functions can be accessed through {server_ip}:31112/ui/. And the Frontend Web App can be accessed through http://{server_ip}**
