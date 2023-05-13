@@ -111,11 +111,14 @@ function App() {
   const deleteToDo = async (indexToRemove, itemId) => {
     if (indexToRemove === null) return;
     if (itemId === null) return;
-
+    const delToDo = {
+      "id": itemId
+    };
     const result = await axios({
-      method: 'DELETE',
-      url: `${process.env.REACT_APP_BACKEND_URL}/function/deletetodo/${itemId}`,
-      withCredentials: true
+      method: 'POST',
+      url: `${process.env.REACT_APP_BACKEND_URL}/function/deletetodo/`,
+      withCredentials: true,
+      data: delToDo
     });
 
     if (result && result.status === 401) {
@@ -128,11 +131,14 @@ function App() {
 
   const completeToDo = async (itemId) => {
     if (itemId === null) return;
-
+    const comToDo = {
+      "id": itemId
+    };
     const result = await axios({
       method: 'POST',
-      url: `${process.env.REACT_APP_BACKEND_URL}/function/completetodo/${itemId}`,
-      withCredentials: true
+      url: `${process.env.REACT_APP_BACKEND_URL}/function/completetodo/`,
+      withCredentials: true,
+      data: comToDo
     });
 
     if (result && result.status === 200) {
