@@ -171,7 +171,7 @@ mongodb://admin:admin@{server_ip}:27017/?authMechanism=DEFAULT
 
 After connection, you can see
 
-![image-20230513164917907](images\mongodb.png)
+![image-20230513164917907](images/mongodb.png)
 
 #### Step 4: Deploy Openfaas Functions
 
