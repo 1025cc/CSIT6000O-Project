@@ -43,11 +43,13 @@ To setup the environment, you can use an automatic script on EC2 launch.
 ```bash
 #!/bin/bash
 git clone https://github.com/hkust-6000o-2023s/course-project-cloud-explorers
+# navigate to the code repo
 cd course-project-cloud-explorers
-sh setup.sh 2>&1 > /tmp/setup.log
-#set environment variables 
-#remember to replace with the public network ip of your EC2 instance
-sudo SERVER_IP={public network ip} sh deploy.sh 2>&1 > /tmp/deploy.log
+# setup
+sh setup.sh 2>&1 | tee /tmp/setup.log
+# set environment variables 
+# remember to replace with the public network ip of your EC2 instance
+sudo SERVER_IP={public network ip} sh deploy.sh 2>&1 | tee /tmp/deploy.log
 ```
 
 The user data runs two scripts:
