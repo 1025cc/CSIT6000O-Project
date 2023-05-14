@@ -47,7 +47,7 @@ kubectl apply -f ${SCRIPT_DIR}/mongodb.yml
 echo "> Port forwarding for mongodb-service"
 kubectl port-forward -n openfaas-fn svc/mongodb-service 27017:27017 --address=0.0.0.0 &
 
-echo "> Waiting until MongoDB to launch on 8080"
+echo "> Waiting until MongoDB to launch on 27017"
 while ! nc -z localhost 27017; do
 	sleep 1
 done
