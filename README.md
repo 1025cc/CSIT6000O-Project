@@ -4,9 +4,8 @@ CSIT6000o Project - Serverless To Do List Application
 
 | Name      | SID      | ITSC    | CONTRIBUTION                                                 |
 | --------- | -------- | ------- | ------------------------------------------------------------ |
-| PAN Han   | 20881280 | hpanan  | Openfaas functions, Replace DynamoDB with MongoDB， Kubernetes deployment, Automation scripts |
+| PAN Han   | 20881280 | hpanan  | Openfaas functions, MongoDB, Kubernetes deployment, Automation scripts |
 | CHEN Chen | 20881450 | cchencu | Modify,build and deploy frontend service, Replace API Gateway with NGINX Ingress Controller, Automation scripts |
-|           |          |         |                                                              |
 |           |          |         |                                                              |
 
 ## Background
@@ -346,6 +345,10 @@ sudo docker push cccccci/todolist-frontend
 
 MongoDB：
 
+https://tsejx.github.io/devops-guidebook/deploy/docker/mongodb/
+
+https://www.cnblogs.com/soowin/p/14209581.html
+
 https://blog.csdn.net/majiayu000/article/details/126491116
 
 https://blog.csdn.net/qq_28550263/article/details/119892582
@@ -355,6 +358,7 @@ https://www.panyanbin.com/article/c602b9e2.html
 https://juejin.cn/post/6844903597465927694
 
 https://blog.alexellis.io/serverless-databases-with-openfaas-and-mongo/
+
 
 OpenFass：
 
