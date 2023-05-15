@@ -341,6 +341,28 @@ Push docker image
 sudo docker push cccccci/todolist-frontend
 ```
 
+## Useful Commands
+
+Here are some useful commands to help you check the status of your kubernetes resources:
+
+```bash
+#kubectl get <resource> -n <spacename>
+kubectl get svc -n openfaas
+kubectl get pods -n openfaas
+kubectl get ingress -n openfaas
+```
+
+![image-20230513125934768](images/status.png)
+
+The following commands are used to access the pod and query the logs:
+
+```bash
+#kubectl exec -it -n <namespace> <pod-name> -- /bin/bash
+kubectl exec -it -n ingress-nginx ingress-nginx-controller-5d95b79d54-qlccf -- /bin/bash
+#kubectl logs <pod-name> -n <namespace>
+kubectl logs ingress-nginx-controller-5d95b79d54-qlccf -n ingress-nginx
+```
+
 ## Reference
 
 MongoDB：
