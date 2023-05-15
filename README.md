@@ -372,3 +372,22 @@ https://zhuanlan.zhihu.com/p/601314424
 
 https://segmentfault.com/a/1190000023702396
 
+Kubernetes：
+
+https://kubernetes.io/docs/tasks/access-application-cluster/ingress-minikube/
+
+https://kubernetes.github.io/ingress-nginx/how-it-works/
+
+https://devopscube.com/kubernetes-ingress-tutorial/
+
+https://kubernetes.io/docs/concepts/services-networking/
+
+https://blog.csdn.net/weixin_42595012/article/details/100692084
+
+https://blog.csdn.net/sinat_32582203/article/details/120449471
+
+React：
+
+https://blog.logrocket.com/deploy-react-app-kubernetes-using-docker/
+
+https://mattermost.com/blog/how-to-deploy-a-react-app-to-kubernetes-using-docker/
