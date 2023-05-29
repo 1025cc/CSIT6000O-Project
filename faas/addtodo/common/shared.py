@@ -37,7 +37,7 @@ def get_headers(user_id):
     headers = HEADERS
     cookie = SimpleCookie()
     cookie["userID"] = user_id
-    cookie["userID"]["max-age"] = (60 * 60) * 24  # 1 day
+    cookie["userID"]["max-age"] = (60 * 60) * 24 * 7 # 7 day
     cookie["userID"]["httponly"] = True
     cookie["userID"]["path"] = "/"
     headers["Set-Cookie"] = cookie["userID"].OutputString()

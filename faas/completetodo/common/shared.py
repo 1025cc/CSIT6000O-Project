@@ -23,22 +23,22 @@ def get_user_id(event_headers):
     cookie = SimpleCookie()
     try:
         cookie.load(event_headers["cookie"])
-        cart_cookie = cookie["userID"].value
+        user_cookie = cookie["userID"].value
         generated = False
     except KeyError:
-        cart_cookie = str(uuid.uuid4())
+        user_cookie = str(uuid.uuid4())
         generated = True
 
-    return cart_cookie, generated
+    return user_cookie, generated
 
-def get_headers(cart_id):
+def get_headers(user_id):
     """
     Get the headers to add to response data
     """
     headers = HEADERS
     cookie = SimpleCookie()
-    cookie["userID"] = cart_id
-    cookie["userID"]["max-age"] = (60 * 60) * 24  # 1 day
+    cookie["userID"] = user_id
+    cookie["userID"]["max-age"] = (60 * 60) * 24 * 7 # 7 day
     cookie["userID"]["httponly"] = True
     cookie["userID"]["path"] = "/"
     headers["Set-Cookie"] = cookie["userID"].OutputString()

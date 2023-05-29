@@ -295,7 +295,9 @@ Get into container
 docker exec -it faas-mongodb mongo
 ```
 
-Then you can make adjustments to the MongoDB database
+Then you can make adjustments to the MongoDB database.
+
+After that, commit it as a image.
 
 ```bash
 docker commit faas-mongodb imagesId
