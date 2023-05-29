@@ -6,7 +6,11 @@ CSIT6000o Project - Serverless To Do List Application
 | --------- | -------- | ------- | ------------------------------------------------------------ |
 | PAN Han   | 20881280 | hpanan  | Openfaas functions, MongoDB, Kubernetes deployment, Automation scripts |
 | CHEN Chen | 20881450 | cchencu | Modify,build and deploy frontend service, Replace API Gateway with NGINX Ingress Controller, Automation scripts |
-|           |          |         |                                                              |
+| LONG Shiyao     |   20932120       |    slongaa     |  Produce project report, presentation slides, record presentation video                                                            |
+
+## Presentation Video
+
+[![CSIT6000O Course Project Presentation](https://res.cloudinary.com/marcomontalbano/image/upload/v1684155259/video_to_markdown/images/youtube--p1NoMuWnN1M-c05b58ac6eb4c4700831b2b3070cd403.jpg)](https://www.youtube.com/watch?v=p1NoMuWnN1M "CSIT6000O Course Project Presentation")
 
 ## Background
 
@@ -14,9 +18,9 @@ This project derives from the serverless web application from AWS Sample: https:
 
 ## Infrastructure
 
-The project is ready for deployment to a kubernetes cluster. To make the deployment simple enough, we build some automation script to deploy the project to a single-node Minikube cluster built on an AWS EC2 machine. The EC2 instance should expose the HTTP port 80 for frontend web application and port 8080 for OpenFaas functions. The deployments include a MongoDB database, several OpenFaas functions and a React Frontend application. All of these are deployed to the same namespace in the Kubernetes cluster: openfaas-fn. The infrastructure is illustrated by the figure below:
+The re-implemented serverless application consists of several open-source components that replace the AWS components in the original application. The application is fully containerized using Docker images and is ready to be deployed to any Kubernetes cluster. Our deployment utilizes a Minikube cluster, which is a lightweight Kubernetes implementation that contains only one node. To access the application, requests are first sent to the Nginx Ingress, which matches the URL path of the request against the configured rules and forwards the request to the appropriate Kubernetes services. The frontend service exposes an port 80 and the gateway service exposes a port 8080 within the cluster. OpenFaas is used to replace AWS Lambda in the original application, allowing for easy deployment of functions to Kubernetes clusters. The database service is implemented using MongoDB. To simplify the communication of resources within the cluster, we deploy ingress, frontend service and openfaas gateway service in the same namespace named "openfaas". The database service and openfaas function services are deployed within another namespace, named "openfaas-fn”. The infrastructure is illustrated by the figure below:
 
-此处应有图。
+![Infrastructure.png](https://s2.loli.net/2023/05/15/zdVlFDGe5curovh.png)
 
 ## Deploy to an AWS EC2 instance
 
@@ -341,6 +345,28 @@ Push docker image
 ```bash
 # also remember to use your own username
 sudo docker push cccccci/todolist-frontend
+```
+
+## Useful Commands
+
+Here are some useful commands to help you check the status of your kubernetes resources:
+
+```bash
+#kubectl get <resource> -n <spacename>
+kubectl get svc -n openfaas
+kubectl get pods -n openfaas
+kubectl get ingress -n openfaas
+```
+
+![image-20230513125934768](images/status.png)
+
+The following commands are used to access the pod and query the logs:
+
+```bash
+#kubectl exec -it -n <namespace> <pod-name> -- /bin/bash
+kubectl exec -it -n ingress-nginx ingress-nginx-controller-5d95b79d54-qlccf -- /bin/bash
+#kubectl logs <pod-name> -n <namespace>
+kubectl logs ingress-nginx-controller-5d95b79d54-qlccf -n ingress-nginx
 ```
 
 ## Reference
